@@ -13,39 +13,39 @@
     <div id="message"></div>
 
     {% comment %} <!-- mi_template.html -->
-<div class="captcha-container">
-    {% if img_src %}
-        <img src="{{ img_src }}" alt="Captcha" />
-        <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
-    {% endif %}
-</div>
-
-    <!-- templates/mi_template.html -->
-
-<form id="miFormulario" action="/ruta-a-tu-vista/" method="post">
-    {% csrf_token %}
-    <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input">
-    <input type="submit" value="Enviar">
-</form>
-
-
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Ingresa el Código</title>
-</head>
-<body>
-    <form method="post">
+    <div class="captcha-container">
+        {% if img_src %}
+            <img src="data:image/png;base64,{{ img_base64 }}" alt="Captcha Image">
+            <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
+        {% endif %}
+    </div>
+    
+        <!-- templates/mi_template.html -->
+    
+    <form id="miFormulario" action="/ruta-a-tu-vista/" method="post">
         {% csrf_token %}
-        <!-- Renderizar 6 inputs para el código -->
-        {% for i in "123456" %}
-        <input type="text" name="input{{i}}" maxlength="1" size="1" pattern="[0-9]*" autocomplete="off">
-        {% endfor %}
-        <button type="submit">Enviar</button>
+        <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input">
+        <input type="submit" value="Enviar">
     </form>
-</body>
-</html> {% endcomment %}
+    
+    
+    
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Ingresa el Código</title>
+    </head>
+    <body>
+        <form method="post">
+            {% csrf_token %}
+            <!-- Renderizar 6 inputs para el código -->
+            {% for i in "123456" %}
+            <input type="text" name="input{{i}}" maxlength="1" size="1" pattern="[0-9]*" autocomplete="off">
+            {% endfor %}
+            <button type="submit">Enviar</button>
+        </form>
+    </body>
+    </html> {% endcomment %}
 
 
 

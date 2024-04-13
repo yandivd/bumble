@@ -6,6 +6,9 @@ from .forms import RegistrationForm
 from django.http import JsonResponse
 import threading
 from selenium.webdriver.support import expected_conditions as EC
+import shutil
+import os
+from django.conf import settings
 import random
 from PIL import Image
 from io import BytesIO
@@ -61,7 +64,8 @@ def handle_registration(request):
             # Por ejemplo, podrías llamar a una función que haga el trabajo con Selenium
             # y pasarle los datos del formulario como argumentos
             threading.Thread(target=registro_cookies, args=(request, form.cleaned_data,)).start()
-            return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
+            # return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
+            return redirect('form2')
     else:
         form = RegistrationForm()
     
@@ -194,13 +198,16 @@ def registro_cookies(request, phone_number):
                 # Verificar si la respuesta es exitosa
                 # Verificar si la respuesta es exitosa
                 if response.status_code == 200:
-                    # Guardar la imagen descargada en un archivo
+                    # Guardar la imagen del CAPTCHA
                     with open('captcha_image.png', 'wb') as img_file:
                         img_file.write(response.content)
                     print("Imagen del captcha guardada como captcha_image.png")
-                    
-                    # Retornar la respuesta renderizada para redirigir al usuario a form2.html
-                    return redirect('form2')
+
+                    # Construye la ruta completa de la imagen
+                    image_path = os.path.join(settings.MEDIA_ROOT, 'captcha_image.png')
+
+                    # Mover la imagen a la carpeta 'media'
+                    shutil.move('captcha_image.png', image_path)
                 
                 else:
                     print('Error al descargar la imagen del captcha')
@@ -247,11 +254,7 @@ def mostrar_inputs(request):
 
 import base64
 def form2(request):
-    with open('captcha_image.png', 'rb') as img_file:
-        img_base64 = base64.b64encode(img_file.read()).decode('utf-8')
-    return render('bumble_app/form2.html', {
-        'img_base64': img_base64,
-    })
+    return render(request,'bumble_app/form2.html')
 
 
 
