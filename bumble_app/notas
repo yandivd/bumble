@@ -1,0 +1,62 @@
+'''    try:
+        iframe = driver.find_element(By.ID, "sp_message_iframe_971220")
+        driver.switch_to.frame(iframe)
+        print("encontro el iframe")
+    except:
+        print("no encontro el iframe")
+
+    time.sleep(random.uniform(9, 15))
+
+    codigo_fuente = driver.page_source
+    print(codigo_fuente)
+
+    # Imprimir el código fuente en la consola
+    #print(codigo_fuente)
+
+
+
+
+
+
+    # Vuelve al contexto principal del documento
+
+
+    try:
+        # Espera a que el iframe esté presente y luego cambia al contexto del iframe
+        #WebDriverWait(driver, 20).until(
+            #EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "#sp_message_iframe_971214")) #local
+
+       #     EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "#sp_message_iframe_971220")) #aws
+        #)
+
+        # Ahora que estamos en el contexto del iframe, busca y haz clic en el botón
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button[title='Accept All'][aria-label='Accept All']"))
+            #EC.visibility_of_element_located((By.XPATH, "//button[@title='Aceptar cookies']"))
+        ).click()
+        print("Botón  Accept All clickeado1.")
+
+    except:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "button[title='Accept All']"))
+            # EC.visibility_of_element_located((By.XPATH, "//button[@title='Aceptar cookies']"))
+        ).click()
+        print("Botón  Accept All clickeado2.")
+    finally:
+        pass
+
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.sp_choice_type_11"))
+            #EC.visibility_of_element_located((By.XPATH, "//button[@title='Aceptar cookies']"))
+        ).click()
+        print("Botón  Accept All clickeado3.")
+
+    except Exception as e:
+        print("Error al clickear el botón Accept All:", e)
+    finally:
+        # Vuelve al contenido principal de la página
+        driver.switch_to.default_content()
+    time.sleep(random.uniform(5, 8))
+    driver.switch_to.default_content()
+    time.sleep(1)'''

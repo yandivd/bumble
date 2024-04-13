@@ -1,0 +1,73 @@
+<!-- registration.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro</title>
+</head>
+<body>
+    <form id="registrationForm">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Registrar</button>
+    </form>
+    <div id="message"></div>
+
+    {% comment %} <!-- mi_template.html -->
+<div class="captcha-container">
+    {% if img_src %}
+        <img src="{{ img_src }}" alt="Captcha" />
+        <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
+    {% endif %}
+</div>
+
+    <!-- templates/mi_template.html -->
+
+<form id="miFormulario" action="/ruta-a-tu-vista/" method="post">
+    {% csrf_token %}
+    <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input">
+    <input type="submit" value="Enviar">
+</form>
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ingresa el Código</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <!-- Renderizar 6 inputs para el código -->
+        {% for i in "123456" %}
+        <input type="text" name="input{{i}}" maxlength="1" size="1" pattern="[0-9]*" autocomplete="off">
+        {% endfor %}
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html> {% endcomment %}
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#registrationForm').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '',  // La URL actual
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#message').text(response.message);
+                    // Aquí podrías agregar más lógica para manejar los siguientes pasos
+                    // Por ejemplo, mostrar un nuevo input para el código de verificación cuando sea necesario
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
+
+
