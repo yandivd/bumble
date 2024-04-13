@@ -60,12 +60,12 @@ def handle_registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            # Aquí iría la lógica para iniciar el proceso con Selenium en un hilo separado
-            # Por ejemplo, podrías llamar a una función que haga el trabajo con Selenium
-            # y pasarle los datos del formulario como argumentos
+            # Iniciar el proceso con Selenium en un hilo separado
             threading.Thread(target=registro_cookies, args=(request, form.cleaned_data,)).start()
-            # return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
-            return redirect('form2')
+            
+            # Devolver una respuesta JSON
+            return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
+    
     else:
         form = RegistrationForm()
     
@@ -254,7 +254,25 @@ def mostrar_inputs(request):
 
 import base64
 def form2(request):
-    return render(request,'bumble_app/form2.html')
+    if request.method == 'POST':
+        # Aquí puedes manejar la validación del CAPTCHA y cualquier otra acción necesaria
+        captcha_code = request.POST.get('captcha_code')
+        
+        # Validar el código del CAPTCHA (esto es solo un ejemplo, debes implementar la validación real)
+        if captcha_code == '123456':  # Reemplaza '123456' con el código real del CAPTCHA
+            # Procesar el registro completo (guardar en la base de datos, enviar correos, etc.)
+            # ...
+            
+            # Redirigir a la página de éxito o a donde quieras que vaya el usuario después del registro
+            return redirect('registration_success')  # Reemplaza 'registration_success' con la URL de la página de éxito o la que prefieras
+            
+        else:
+            # Mostrar un mensaje de error si el código del CAPTCHA no es válido
+            return JsonResponse({'message': 'Código de verificación incorrecto'}, status=400)
+    
+    else:
+        # Si el método es GET, simplemente muestra el formulario con el CAPTCHA
+        return render(request, 'bumble_app/form2.html')
 
 
 
