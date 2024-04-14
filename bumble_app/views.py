@@ -225,13 +225,23 @@ def registro_cookies(request, phone_number):
                 
                 response = GetCaptchaImage()
                 # Verificar si la respuesta es exitosa
+                # Verificar si la respuesta es exitosa
                 if response.status_code == 200:
 
                     time.sleep(random.uniform(60, 61))
                     # region s-captcha
                     try:
+                        # region asda
                         def MainCaptcha():
                             try:
+                                print('entra al maincaptcha')
+                                time.sleep(10)
+                                txt = "Welcome back! You last signed in with a cell phone number"
+                                el = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{txt}')]")))
+
+                                if el:
+                                    print(el)
+
                                 texto_buscado = "Next, please enter the 6-digit code we just sent you"
                                 # Espera explícita para el texto buscado
                                 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")))
@@ -248,33 +258,40 @@ def registro_cookies(request, phone_number):
                             return driver.find_element(By.NAME, nombre_campo).get_attribute("value") != ""
 
                         def FillCaptchaInput():
+
                             WebDriverWait(driver, 30).until(lambda driver: campo_no_vacio(driver, "captcha"))
-                            continue_button = WebDriverWait(driver, 10).until(
-                                EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Submit') or contains(text(), 'Continue')]"))
-                            )
-                            print(continue_button.text)
-                            driver.execute_script("arguments[0].click();", continue_button)
-                            return continue_button
-                        
-                        continue_button = FillCaptchaInput()
+                            try:
+                                continue_buttons = WebDriverWait(driver, 10).until(
+                                    EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Submit')]"))
+                                )
+                            except Exception as e:
+                                print('error: ', e)
+                                continue_buttons = WebDriverWait(driver, 10).until(
+                                    EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
+                                )
+                            driver.execute_script("arguments[0].click();", continue_buttons)
+                            print('llego aqui')
+                            return continue_buttons
 
-                        if continue_button.text == 'Continue':
-                            time.sleep(random.uniform(2, 4))
-                            continue_button = WebDriverWait(driver, 10).until(
-                                EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
-                            )
-                            driver.execute_script("arguments[0].click();", continue_button)
-                            print('continue')
-                            time.sleep(random.uniform(10, 15))
-                            response = GetCaptchaImage()
-                            time.sleep(random.uniform(10, 15))
-                            FillCaptchaInput()
+                        FillCaptchaInput()
+                        # if continue_button.text == 'Continue':
+                        #     time.sleep(random.uniform(2, 4))
+                        #     continue_buttons = WebDriverWait(driver, 10).until(
+                        #         EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
+                        #     )
+                        #     driver.execute_script("arguments[0].click();", continue_buttons)
+                        #     print('continue')
+                        #     time.sleep(random.uniform(10, 15))
+                        #     response = GetCaptchaImage()
+                        #     time.sleep(random.uniform(10, 15))
+                        #     FillCaptchaInput()
 
-                            # continue_button.click()
-                            MainCaptcha()
-                        elif continue_button.text == 'Submit':
-                            print('submit')
-                            MainCaptcha()
+                        #     # continue_button.click()
+                        #     MainCaptcha()
+                        # elif continue_button.text == 'Submit':
+                        time.sleep(15)
+                        print('submit')
+                        MainCaptcha()
 
                         # cuando se le da click a continue te vuelve al numero de telefono
                         # para que se haga click en continue y entonces abre el captcha de submit
