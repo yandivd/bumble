@@ -1,19 +1,5 @@
     <!-- mi_template.html -->
     <!-- registration.html -->
-
-    <div class="captcha-container">
-        <img src="http://localhost:8000/media/captcha_image.png" alt="Captcha Image">
-        <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
-    </div>
-
-    
-        <!-- templates/mi_template.html -->
-    
-    <form id="miFormulario" action="/ruta-a-tu-vista/" method="post">
-        {% csrf_token %}
-        <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input">
-        <input type="submit" value="Enviar">
-    </form>
     
     
     
@@ -23,6 +9,21 @@
         <title>Ingresa el Código</title>
     </head>
     <body>
+        <div class="captcha-container">
+            <img src="http://localhost:8000/media/captcha_image.png" alt="Captcha Image">
+            <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
+        </div>
+    
+        
+            <!-- templates/mi_template.html -->
+        
+        <form id="captchaForm" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <!-- <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input"> -->
+            <input type="submit" value="Enviar">
+        </form>
+
         <form method="post">
             {% csrf_token %}
             <!-- Renderizar 6 inputs para el código -->
@@ -31,5 +32,33 @@
             {% endfor %}
             <button type="submit">Enviar</button>
         </form>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('#captchaForm').submit(function(e) {
+                    e.preventDefault();
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: $(this).attr('action'),
+                        data: $(this).serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            console.log(response)
+                            // if (response.message === 'Espere hasta que se le solicite el código de verificación') {
+                            //     // Redirigir a form2
+                            //     setTimeout(() => {
+                            //         window.location.href = '{% url "form2" %}';
+                            //     }, 60000)
+                            // }
+                        },
+                        error: function(error) {
+                            console.error("Error al enviar el formulario:", error);
+                        }
+                    });
+                });
+            })
+        </script>
     </body>
     </html>

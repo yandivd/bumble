@@ -2,7 +2,7 @@ from django.http import HttpResponse
 # Create your views here.
 # views.py
 from django.shortcuts import redirect, render
-from .forms import RegistrationForm
+from .forms import RegistrationForm, CaptchaForm
 from django.http import JsonResponse
 import threading
 from selenium.webdriver.support import expected_conditions as EC
@@ -56,15 +56,26 @@ import time
 import re
 import time
 
+from queue import Queue
+
+cola_comandos = Queue()
+# region proceso
 def handle_registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             # Iniciar el proceso con Selenium en un hilo separado
             threading.Thread(target=registro_cookies, args=(request, form.cleaned_data,)).start()
+            while True:
+                if not cola_comandos.empty():
+                    comando = cola_comandos.get()
+                    if comando['tipo'] == 'find_element':
+                        element = driver.find_element(By.NAME, comando['name'])
+                    elif comando['tipo'] == 'send_keys':
+                        element.send_keys(comando['texto'])
             
             # Devolver una respuesta JSON
-            return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
+            # return JsonResponse({'message': 'Espere hasta que se le solicite el código de verificación'})
     
     else:
         form = RegistrationForm()
@@ -91,6 +102,7 @@ def registro_cookies(request, phone_number):
         chrome_options.add_experimental_option("prefs", profile)
         print('3')
         driver_path = '/usr/local/share/chromedriver'
+        global driver
         driver = webdriver.Chrome(options=chrome_options)
 
         driver.set_window_size(1800, 768)  # Establece el tamaño de la ventana
@@ -170,44 +182,105 @@ def registro_cookies(request, phone_number):
             time.sleep(random.uniform(10, 15))
             # pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
             try:
-                texto_buscado = "captcha__image"
-                captcha__image = driver.find_elements(By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")
+                def GetCaptchaImage():
+                    texto_buscado = "captcha__image"
+                    captcha__image = driver.find_elements(By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")
+
+                    if captcha__image:
+                        print("Encontrado texto captcha__image")
+                        img_src = soup.find('img', {'class': 'captcha__image'})['src']
+                        print('img_src=', img_src)
+                        input_element = driver.find_element(By.ID, 'miInput')
+                        return render(request, 'registration.html', {'img_src': img_src})
+                    else:
+                        print("No encontró imagen de captcha")
+
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//img[contains(@src, "https://us1.bumble.com/hidden?euri=")]')))
+
+                    img_element = driver.find_element(By.XPATH, '//img[contains(@src, "https://us1.bumble.com/hidden?euri=")]')
+                    img_src = img_element.get_attribute("src")
+                    print("URL de la imagen:", img_src)
+                    # Extraer solo la parte de la ruta de la imagen de la URL
+                    img_path = img_src.split('https:/us1.bumble.com/')[-1]
+
+                    # Construir la URL completa de la imagen
+                    full_img_url = f"https://us1.bumble.com/{img_path}"
+
+                    # Descargar la imagen del captcha
+                    response = requests.get(full_img_url)
+
+                    if response.status_code == 200:
+                        # Guardar la imagen del CAPTCHA
+                        with open('captcha_image.png', 'wb') as img_file:
+                            img_file.write(response.content)
+                        print("Imagen del captcha guardada como captcha_image.png")
+
+                        # Construye la ruta completa de la imagen
+                        image_path = os.path.join(settings.MEDIA_ROOT, 'captcha_image.png')
+
+                        # Mover la imagen a la carpeta 'media'
+                        shutil.move('captcha_image.png', image_path)
+
+                    return response
                 
-                if captcha__image:
-                    print("Encontrado texto captcha__image")
-                    img_src = soup.find('img', {'class': 'captcha__image'})['src']
-                    print('img_src=', img_src)
-                    input_element = driver.find_element(By.ID, 'miInput')
-                    return render(request, 'registration.html', {'img_src': img_src})
-                else:
-                    print("No encontró imagen de captcha")
-
-                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//img[contains(@src, "https://us1.bumble.com/hidden?euri=")]')))
-                
-                img_element = driver.find_element(By.XPATH, '//img[contains(@src, "https://us1.bumble.com/hidden?euri=")]')
-                img_src = img_element.get_attribute("src")
-                print("URL de la imagen:", img_src)
-                # Extraer solo la parte de la ruta de la imagen de la URL
-                img_path = img_src.split('https:/us1.bumble.com/')[-1]
-
-                # Construir la URL completa de la imagen
-                full_img_url = f"https://us1.bumble.com/{img_path}"
-
-                # Descargar la imagen del captcha
-                response = requests.get(full_img_url)
-                # Verificar si la respuesta es exitosa
+                response = GetCaptchaImage()
                 # Verificar si la respuesta es exitosa
                 if response.status_code == 200:
-                    # Guardar la imagen del CAPTCHA
-                    with open('captcha_image.png', 'wb') as img_file:
-                        img_file.write(response.content)
-                    print("Imagen del captcha guardada como captcha_image.png")
 
-                    # Construye la ruta completa de la imagen
-                    image_path = os.path.join(settings.MEDIA_ROOT, 'captcha_image.png')
+                    time.sleep(random.uniform(60, 61))
+                    # region s-captcha
+                    try:
+                        def MainCaptcha():
+                            try:
+                                texto_buscado = "Next, please enter the 6-digit code we just sent you"
+                                # Espera explícita para el texto buscado
+                                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")))
+                                elementos2 = driver.find_elements(By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")
+                                print(elementos2)
+                                if elementos2:
+                                    threading.Thread(target=mostrar_inputs, args=(request,)).start()
+                                else:
+                                    print("El texto no fue encontrado en la página.")
+                            except Exception as e:
+                                print(f"Error: {e}")
 
-                    # Mover la imagen a la carpeta 'media'
-                    shutil.move('captcha_image.png', image_path)
+                        def campo_no_vacio(driver, nombre_campo):
+                            return driver.find_element(By.NAME, nombre_campo).get_attribute("value") != ""
+
+                        def FillCaptchaInput():
+                            WebDriverWait(driver, 30).until(lambda driver: campo_no_vacio(driver, "captcha"))
+                            continue_button = WebDriverWait(driver, 10).until(
+                                EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Submit') or contains(text(), 'Continue')]"))
+                            )
+                            print(continue_button.text)
+                            driver.execute_script("arguments[0].click();", continue_button)
+                            return continue_button
+                        
+                        continue_button = FillCaptchaInput()
+
+                        if continue_button.text == 'Continue':
+                            time.sleep(random.uniform(2, 4))
+                            continue_button = WebDriverWait(driver, 10).until(
+                                EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
+                            )
+                            driver.execute_script("arguments[0].click();", continue_button)
+                            print('continue')
+                            time.sleep(random.uniform(10, 15))
+                            response = GetCaptchaImage()
+                            time.sleep(random.uniform(10, 15))
+                            FillCaptchaInput()
+
+                            # continue_button.click()
+                            MainCaptcha()
+                        elif continue_button.text == 'Submit':
+                            print('submit')
+                            MainCaptcha()
+
+                        # cuando se le da click a continue te vuelve al numero de telefono
+                        # para que se haga click en continue y entonces abre el captcha de submit
+
+                    except Exception as e:
+                        print('error: ', e)
                 
                 else:
                     print('Error al descargar la imagen del captcha')
@@ -252,27 +325,39 @@ def mostrar_inputs(request):
     else:
         return render(request, 'mostrar_inputs.html')
 
+# region captcha
 import base64
 def form2(request):
     if request.method == 'POST':
-        # Aquí puedes manejar la validación del CAPTCHA y cualquier otra acción necesaria
-        captcha_code = request.POST.get('captcha_code')
+        form = CaptchaForm(request.POST)
+        if form.is_valid():
+            # Aquí puedes manejar la validación del CAPTCHA y cualquier otra acción necesaria
+            captcha_code = form.cleaned_data['captcha_text']
+            print(captcha_code)
+            
+            comando_find_element = {'tipo': 'find_element', 'name': 'captcha'}
+            comando_send_keys = {'tipo': 'send_keys', 'texto': captcha_code}
+            cola_comandos.put(comando_find_element)
+            cola_comandos.put(comando_send_keys)
+            # return HttpResponse("Comando enviado al proceso de Selenium")
         
         # Validar el código del CAPTCHA (esto es solo un ejemplo, debes implementar la validación real)
-        if captcha_code == '123456':  # Reemplaza '123456' con el código real del CAPTCHA
-            # Procesar el registro completo (guardar en la base de datos, enviar correos, etc.)
-            # ...
+        # if captcha_code == '123456':  # Reemplaza '123456' con el código real del CAPTCHA
+        #     # Procesar el registro completo (guardar en la base de datos, enviar correos, etc.)
+        #     # ...
             
-            # Redirigir a la página de éxito o a donde quieras que vaya el usuario después del registro
-            return redirect('registration_success')  # Reemplaza 'registration_success' con la URL de la página de éxito o la que prefieras
+        #     # Redirigir a la página de éxito o a donde quieras que vaya el usuario después del registro
+        #     return redirect('registration_success')  # Reemplaza 'registration_success' con la URL de la página de éxito o la que prefieras
             
-        else:
-            # Mostrar un mensaje de error si el código del CAPTCHA no es válido
-            return JsonResponse({'message': 'Código de verificación incorrecto'}, status=400)
+        # else:
+        #     # Mostrar un mensaje de error si el código del CAPTCHA no es válido
+        #     return JsonResponse({'message': 'Código de verificación incorrecto'}, status=400)
     
     else:
         # Si el método es GET, simplemente muestra el formulario con el CAPTCHA
-        return render(request, 'bumble_app/form2.html')
+        form = CaptchaForm()
+        # return render(request, 'bumble_app/form2.html', {'form': form})
+    return render(request, 'bumble_app/form2.html', {'form': form})
 
 
 

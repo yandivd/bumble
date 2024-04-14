@@ -68,16 +68,20 @@
         $('#registrationForm').submit(function(e) {
             e.preventDefault();
             
+            console.log('timeout')
+            setTimeout(() => {
+                window.location.href = '{% url "form2" %}';
+            }, 100000)
             $.ajax({
                 type: 'POST',
                 url: $(this).attr('action'),
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response) {
-                    if (response.message === 'Espere hasta que se le solicite el código de verificación') {
-                        // Redirigir a form2
-                        window.location.href = '{% url "form2" %}';
-                    }
+                    console.log(response)
+                    // if (response.message === 'Espere hasta que se le solicite el código de verificación') {
+                    //     // Redirigir a form2
+                    // }
                 },
                 error: function(error) {
                     console.error("Error al enviar el formulario:", error);
