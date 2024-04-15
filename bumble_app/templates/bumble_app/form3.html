@@ -9,20 +9,15 @@
         <title>Ingresa el Código</title>
     </head>
     <body>
-        <div class="captcha-container">
-            <img src="http://localhost:8000/media/captcha_image.png" alt="Captcha Image">
-            <!-- Agrega aquí el resto del HTML para el input del captcha, etc. -->
-        </div>
-    
-        
-            <!-- templates/mi_template.html -->
-        
-        <form id="captchaForm" method="post">
+        <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <!-- <input type="text" id="miInput" name="miInput" placeholder="Escribe algo aquí" class="text-field__input"> -->
-            <input type="submit" value="Enviar">
+            <!-- Renderizar 6 inputs para el código -->
+            {% for i in "123456" %}
+            <input type="text" name="sms_code_{{i}}" id="sms_code_{{i}}" maxlength="1" size="1" pattern="[0-9]*" autocomplete="off">
+            {% endfor %}
+            <button type="submit">Enviar</button>
         </form>
+        
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>

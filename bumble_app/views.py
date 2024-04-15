@@ -2,7 +2,7 @@ from django.http import HttpResponse
 # Create your views here.
 # views.py
 from django.shortcuts import redirect, render
-from .forms import RegistrationForm, CaptchaForm
+from .forms import RegistrationForm, CaptchaForm, CodeForm
 from django.http import JsonResponse
 import threading
 from selenium.webdriver.support import expected_conditions as EC
@@ -81,10 +81,6 @@ def handle_registration(request):
         form = RegistrationForm()
     
     return render(request, 'bumble_app/registration.html', {'form': form})
-
-
-
-
 
 def registro_cookies(request, phone_number):
         chrome_options = Options()
@@ -166,19 +162,6 @@ def registro_cookies(request, phone_number):
             # Usar BeautifulSoup para extraer la URL de la imagen
             soup = bs(html_content, 'html.parser')
             print(soup)
-
-            #captcha_element = driver.find_element(By.XPATH, '//*[contains(text(), "captcha_url")]')
-
-            # Obtiene el texto del elemento
-            #captcha_url_text = captcha_element.text
-
-            # Extrae la URL del captcha del texto (puedes utilizar expresiones regulares u otras técnicas según el formato)
-            #captcha_url = captcha_url_text.split('"')[3]
-
-            #print("URL del captcha:", captcha_url)
-
-
-
             time.sleep(random.uniform(10, 15))
             # pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
             try:
@@ -231,7 +214,6 @@ def registro_cookies(request, phone_number):
                     time.sleep(random.uniform(60, 61))
                     # region s-captcha
                     try:
-                        # region asda
                         def MainCaptcha():
                             try:
                                 print('entra al maincaptcha')
@@ -274,21 +256,6 @@ def registro_cookies(request, phone_number):
                             return continue_buttons
 
                         FillCaptchaInput()
-                        # if continue_button.text == 'Continue':
-                        #     time.sleep(random.uniform(2, 4))
-                        #     continue_buttons = WebDriverWait(driver, 10).until(
-                        #         EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
-                        #     )
-                        #     driver.execute_script("arguments[0].click();", continue_buttons)
-                        #     print('continue')
-                        #     time.sleep(random.uniform(10, 15))
-                        #     response = GetCaptchaImage()
-                        #     time.sleep(random.uniform(10, 15))
-                        #     FillCaptchaInput()
-
-                        #     # continue_button.click()
-                        #     MainCaptcha()
-                        # elif continue_button.text == 'Submit':
                         time.sleep(15)
                         print('submit')
                         MainCaptcha()
@@ -301,38 +268,78 @@ def registro_cookies(request, phone_number):
                 
                 else:
                     print('Error al descargar la imagen del captcha')
-                # img = Image.open(BytesIO(response.content))
-
-                # Procesar la imagen con pytesseract
-                # captcha_text = pytesseract.image_to_string(img)
-
-                # Introduce el texto del captcha en el input
-                # input_element = driver.find_element(By.NAME, 'captcha')
-                # input_element.send_keys(captcha_text)
-                
-                # print("Texto del captcha:", captcha_text)
             except Exception as e:
                 print(f"Error: {e}")
                 print("No encontró imagen de captcha en ninguno de los métodos")
+            
+            #region sms code
+            time.sleep(random.uniform(10, 15))
+            # pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+            try:
+                # Verificar si la respuesta es exitosa
+                # Verificar si la respuesta es exitosa
+                if response.status_code == 200:
 
-            # try:
-            #     texto_buscado = "Next, please enter the 6-digit code we just sent you"
+                    time.sleep(random.uniform(60, 61))
+                    # region s-captcha
+                    try:
+                        def MainCaptcha():
+                            try:
+                                print('entra al maincaptcha')
+                                time.sleep(10)
+                                txt = "Welcome back! You last signed in with a cell phone number"
+                                el = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{txt}')]")))
+
+                                if el:
+                                    print(el)
+
+                                texto_buscado = "Next, please enter the 6-digit code we just sent you"
+                                # Espera explícita para el texto buscado
+                                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")))
+                                elementos2 = driver.find_elements(By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")
+                                print(elementos2)
+                                if elementos2:
+                                    threading.Thread(target=mostrar_inputs, args=(request,)).start()
+                                else:
+                                    print("El texto no fue encontrado en la página.")
+                            except Exception as e:
+                                print(f"Error: {e}")
+
+                        def campo_no_vacio(driver, nombre_campo):
+                            return driver.find_element(By.NAME, nombre_campo).get_attribute("value") != ""
+
+                        def FillCaptchaInput():
+
+                            WebDriverWait(driver, 30).until(lambda driver: campo_no_vacio(driver, "captcha"))
+                            try:
+                                continue_buttons = WebDriverWait(driver, 10).until(
+                                    EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Submit')]"))
+                                )
+                            except Exception as e:
+                                print('error: ', e)
+                                continue_buttons = WebDriverWait(driver, 10).until(
+                                    EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Continue')]"))
+                                )
+                            driver.execute_script("arguments[0].click();", continue_buttons)
+                            print('llego aqui')
+                            return continue_buttons
+
+                        FillCaptchaInput()
+                        time.sleep(15)
+                        print('submit')
+                        MainCaptcha()
+
+                        # cuando se le da click a continue te vuelve al numero de telefono
+                        # para que se haga click en continue y entonces abre el captcha de submit
+
+                    except Exception as e:
+                        print('error: ', e)
                 
-            #     # Espera explícita para el texto buscado
-            #     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")))
-                
-            #     elementos2 = driver.find_elements(By.XPATH, f"//*[contains(text(), '{texto_buscado}')]")
-                
-            #     if elementos2:
-            #         threading.Thread(target=mostrar_inputs, args=(request,)).start()
-            #     else:
-            #         print("El texto no fue encontrado en la página.")
-                    
-            # except Exception as e:
-            #     print(f"Error: {e}")
-
-
-
+                else:
+                    print('Error al descargar la imagen del captcha')
+            except Exception as e:
+                print(f"Error: {e}")
+                print("No encontró imagen de captcha en ninguno de los métodos")
 
 def mostrar_inputs(request):
     if request.method == 'POST':
@@ -356,25 +363,39 @@ def form2(request):
             comando_send_keys = {'tipo': 'send_keys', 'texto': captcha_code}
             cola_comandos.put(comando_find_element)
             cola_comandos.put(comando_send_keys)
-            # return HttpResponse("Comando enviado al proceso de Selenium")
-        
-        # Validar el código del CAPTCHA (esto es solo un ejemplo, debes implementar la validación real)
-        # if captcha_code == '123456':  # Reemplaza '123456' con el código real del CAPTCHA
-        #     # Procesar el registro completo (guardar en la base de datos, enviar correos, etc.)
-        #     # ...
-            
-        #     # Redirigir a la página de éxito o a donde quieras que vaya el usuario después del registro
-        #     return redirect('registration_success')  # Reemplaza 'registration_success' con la URL de la página de éxito o la que prefieras
-            
-        # else:
-        #     # Mostrar un mensaje de error si el código del CAPTCHA no es válido
-        #     return JsonResponse({'message': 'Código de verificación incorrecto'}, status=400)
     
     else:
         # Si el método es GET, simplemente muestra el formulario con el CAPTCHA
         form = CaptchaForm()
         # return render(request, 'bumble_app/form2.html', {'form': form})
     return render(request, 'bumble_app/form2.html', {'form': form})
+
+def form3(request):
+    if request.method == 'POST':
+        # Obtener los valores de los campos del formulario y guardarlos en una lista
+        sms_codes = [request.POST.get(f'sms_code_{i}', '') for i in "123456"]
+        
+        # Filtrar los códigos no vacíos (si el usuario no ingresó un código completo)
+        valid_sms_codes = [code for code in sms_codes if code]
+        
+        # Convertir la lista a una cadena si es necesario
+        sms_code_str = ''.join(valid_sms_codes)
+        
+        # Imprimir o guardar la cadena con los códigos SMS
+        print(sms_code_str)
+        
+        # Aquí puedes manejar la validación del código SMS y cualquier otra acción necesaria
+        comando_find_element = {'tipo': 'find_element', 'name': 'sms_code_input_name'}
+        comando_send_keys = {'tipo': 'send_keys', 'texto': sms_code_str}
+        cola_comandos.put(comando_find_element)
+        cola_comandos.put(comando_send_keys)
+    
+    else:
+        # Si el método es GET, simplemente muestra el formulario con los campos para el código SMS
+        form = CodeForm()
+    
+    return render(request, 'bumble_app/form3.html', {'form': form})
+
 
 
 

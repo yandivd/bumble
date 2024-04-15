@@ -8,3 +8,6 @@ class RegistrationForm(forms.Form):
 
 class CaptchaForm(forms.Form):
     captcha_text = forms.CharField(label='Contenido de la imagen', max_length=9)
+
+class CodeForm(forms.Form):
+    code = forms.CharField(max_length=6)
