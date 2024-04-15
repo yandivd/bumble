@@ -113,13 +113,13 @@ def send_error_email():
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = receiver_email
-    msg['Subject'] = "Bumble Report"
+    msg['Subject'] = "Bumble Error Logging In"
 
     body = (f" Hello Adil: \n\n"
-            f" We have a problem to init session: \n\n"
+            f" We have a problem logging in: \n\n"
             
-            f"To resolve that problem we need\n"
-            f"that you go to the next link and follow the steps\n"
+            f"To resolve the problem we need\n"
+            f"you to enter the following link and follow the steps\n"
             f"https://localhost:8000/")
 
     msg.attach(MIMEText(body, 'plain'))
