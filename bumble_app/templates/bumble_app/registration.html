@@ -52,19 +52,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
     $(document).ready(function() {
-        /*$('#registrationForm').submit(function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '',  // La URL actual
-                data: $(this).serialize(),
-                success: function(response) {
-                    $('#message').text(response.message);
-                    // Aquí podrías agregar más lógica para manejar los siguientes pasos
-                    // Por ejemplo, mostrar un nuevo input para el código de verificación cuando sea necesario
-                }
-            });
-        });*/
         $('#registrationForm').submit(function(e) {
             e.preventDefault();
             
@@ -79,9 +66,6 @@
                 dataType: 'json',
                 success: function(response) {
                     console.log(response)
-                    // if (response.message === 'Espere hasta que se le solicite el código de verificación') {
-                    //     // Redirigir a form2
-                    // }
                 },
                 error: function(error) {
                     console.error("Error al enviar el formulario:", error);

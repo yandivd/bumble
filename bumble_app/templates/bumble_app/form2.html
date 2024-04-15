@@ -29,7 +29,9 @@
             $(document).ready(function() {
                 $('#captchaForm').submit(function(e) {
                     e.preventDefault();
-                    
+                    setTimeout(() => {
+                        window.location.href = '{% url "form3" %}';
+                    }, 100000)
                     $.ajax({
                         type: 'POST',
                         url: $(this).attr('action'),

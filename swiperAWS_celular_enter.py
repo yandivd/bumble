@@ -109,6 +109,29 @@ def send_email2(number):
 
     print("Email2 enviado.")
 
+def send_error_email():
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = "Bumble Report"
+
+    body = (f" Hello Adil: \n\n"
+            f" We have a problem to init session: \n\n"
+            
+            f"To resolve that problem we need\n"
+            f"that you go to the next link and follow the steps\n"
+            f"https://localhost:8000/")
+
+    msg.attach(MIMEText(body, 'plain'))
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(sender_email, password)
+    text = msg.as_string()
+    server.sendmail(sender_email, receiver_email, text)
+    server.quit()
+
+    print("Email Error Cookies sended.")
+
 def coneccion_driver_extension_location():
     chrome_options = Options()
     #chrome_options.add_argument("--headless")
@@ -145,14 +168,20 @@ def coneccion_driver_extension_location():
 
     time.sleep(random.uniform(2, 4))
 
-    # Cargar la cookie desde un archivo
-    with open('cookies_celular_adil_22_03.json', 'r') as cookie_file:
-        cookies = json.load(cookie_file)
-        for cookie in cookies:
-            if 'expiry' in cookie:
-                del cookie['expiry']  # Selenium no acepta la clave 'expiry'
-            driver.add_cookie(cookie)
-    print("puso las cookies")
+    try:
+        with open('cookies_celular_adil_22_03.json', 'r') as cookie_file:
+            cookies = json.load(cookie_file)
+            for cookie in cookies:
+                if 'expiry' in cookie:
+                    del cookie['expiry']  # Selenium no acepta la clave 'expiry'
+                driver.add_cookie(cookie)
+        print("puso las cookies")
+    except Exception as e:
+        print("Error al cargar las cookies:", e)
+        
+        # Enviar correo electrónico con la URL
+        send_error_email()
+        return
 
     #WebDriverWait(driver, 10).until(lambda d: d.current_url == expected_url)
     driver.get("https://us1.bumble.com/app")
