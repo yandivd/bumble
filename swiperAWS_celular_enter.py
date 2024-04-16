@@ -55,6 +55,22 @@ sender_email = "jmzv13@gmail.com"
 receiver_email = "writetoadil@gmail.com, jmzv13@gmail.com"
 password = "jcdd gmrd ntgu cmsh"
 
+def is_cookie_valid(cookie):
+    # Obtener la fecha de expiración de la cookie
+    expiry_timestamp = cookie.get("expiry", 0)
+    print(expiry_timestamp)
+    
+    # Convertir el timestamp a un objeto datetime
+    expiry_datetime = datetime.fromtimestamp(expiry_timestamp)
+    
+    # Obtener la fecha y hora actuales
+    current_datetime = datetime.now()
+    
+    # Verificar si la cookie ha expirado
+    if expiry_datetime > current_datetime:
+        return True
+    else:
+        return False
 
 def send_email(number):
     date = datetime.now().strftime("%B-%d-%Y %H:%M")
@@ -112,7 +128,8 @@ def send_email2(number):
 def send_error_email():
     msg = MIMEMultipart()
     msg['From'] = sender_email
-    msg['To'] = receiver_email
+    # msg['To'] = receiver_email
+    msg['To'] = 'yandivd@gmail.com'
     msg['Subject'] = "Bumble Error Logging In"
 
     body = (f" Hello Adil: \n\n"
@@ -133,6 +150,7 @@ def send_error_email():
     print("Email Error Cookies sended.")
 
 def coneccion_driver_extension_location():
+    print('INIT EJEC')
     chrome_options = Options()
     #chrome_options.add_argument("--headless")
     chrome_options.add_argument('--disable-dev-shm-usage')
@@ -147,7 +165,6 @@ def coneccion_driver_extension_location():
                "download.default_directory": download_dir, "plugins.always_open_pdf_externally": True,
                "download.extensions_to_open": "applications/pdf"}
     chrome_options.add_experimental_option("prefs", profile)
-
 
     driver_path = 'C:\\Users\\encue\\Dropbox\\toshiba 2021 F\\PycharmProjects\\dashboard\\chromedriver.exe'
     driver = webdriver.Chrome(options=chrome_options)
@@ -169,12 +186,18 @@ def coneccion_driver_extension_location():
     time.sleep(random.uniform(2, 4))
 
     try:
-        with open('cookies_celular_adil_22_03.json', 'r') as cookie_file:
+        with open('cookies_test.json', 'r') as cookie_file:
             cookies = json.load(cookie_file)
             for cookie in cookies:
-                if 'expiry' in cookie:
-                    del cookie['expiry']  # Selenium no acepta la clave 'expiry'
+                # if 'expiry' in cookie:
+                #     del cookie['expiry']  # Selenium no acepta la clave 'expiry'
                 driver.add_cookie(cookie)
+                if is_cookie_valid(cookie):
+                    print('cookies ok')
+                else:
+                    # send_error_email()
+                    print('Las cookies estan vencidas')
+                    return
         print("puso las cookies")
     except Exception as e:
         print("Error al cargar las cookies:", e)
@@ -184,6 +207,8 @@ def coneccion_driver_extension_location():
         return
 
     #WebDriverWait(driver, 10).until(lambda d: d.current_url == expected_url)
+
+    #region error 1
     driver.get("https://us1.bumble.com/app")
     #codigo_fuente = driver.page_source
     #print(codigo_fuente)
@@ -199,12 +224,6 @@ def coneccion_driver_extension_location():
     #actions.move_by_offset(1280, 244).click().perform()
 
     #time.sleep(random.uniform(100, 120))
-
-
-
-
-
-
 
     numero1 = int(random.uniform(75, 85))
     for x in  range(numero1):
@@ -250,14 +269,6 @@ def coneccion_driver_extension_location():
             continue
 
     send_email2(numero1)
+    
 coneccion_driver_extension_location()
 
-'''    cookies = driver.get_cookies()
-
-    # Save the cookies to a JSON file
-    with open("cookies_celular_adil.json", "w") as cookie_file:
-        json.dump(cookies, cookie_file)
-
-    time.sleep(random.uniform(2, 5))
-
-    print("cookies guardadas")'''

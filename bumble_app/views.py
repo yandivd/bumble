@@ -59,6 +59,17 @@ import time
 from queue import Queue
 
 cola_comandos = Queue()
+
+def guardar_cookies():
+    cookies = driver.get_cookies()
+
+    # Save the cookies to a JSON file
+    with open("cookies_test.json", "w") as cookie_file:
+        json.dump(cookies, cookie_file)
+
+    time.sleep(random.uniform(2, 5))
+
+    print("cookies guardadas")
 # region proceso
 def handle_registration(request):
     if request.method == 'POST':
@@ -276,6 +287,8 @@ def registro_cookies(request, phone_number):
             except Exception as e:
                 print(f"Error: {e}")
                 print("No encontró imagen de captcha en ninguno de los métodos")
+        guardar_cookies()
+
 
 def mostrar_inputs(request):
     if request.method == 'POST':
