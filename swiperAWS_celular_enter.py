@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from selenium.webdriver.support import expected_conditions as EC
 import random
 #Vzmj230312@@00 secure1.store.apple.co CORRRCTO
@@ -203,7 +204,8 @@ def coneccion_driver_extension_location():
                     print('Las cookies estan vencidas')
                     flag = False
             if flag == False:
-                return
+                send_error_email()
+                return redirect('register')
         print("puso las cookies")
     except Exception as e:
         print("Error al cargar las cookies:", e)
@@ -211,8 +213,6 @@ def coneccion_driver_extension_location():
         # Enviar correo electrónico con la URL
         send_error_email()
         return
-
-    #WebDriverWait(driver, 10).until(lambda d: d.current_url == expected_url)
 
     #region error 1
     driver.get("https://us1.bumble.com/app")
