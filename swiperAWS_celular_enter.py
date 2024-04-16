@@ -56,10 +56,13 @@ receiver_email = "writetoadil@gmail.com, jmzv13@gmail.com"
 password = "jcdd gmrd ntgu cmsh"
 
 def is_cookie_valid(cookie):
-    # Obtener la fecha de expiración de la cookie
-    expiry_timestamp = cookie.get("expiry", 0)
-    print(expiry_timestamp)
+    # Obtener la fecha de expiración de la cookie si existe
+    expiry_timestamp = cookie.get("expiry", None)
     
+    # Si la cookie no tiene un campo "expiry", consideramos que es válida
+    if expiry_timestamp is None:
+        return True
+
     # Convertir el timestamp a un objeto datetime
     expiry_datetime = datetime.fromtimestamp(expiry_timestamp)
     
