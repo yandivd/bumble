@@ -191,6 +191,7 @@ def coneccion_driver_extension_location():
     try:
         with open('cookies_test.json', 'r') as cookie_file:
             cookies = json.load(cookie_file)
+            flag = True
             for cookie in cookies:
                 # if 'expiry' in cookie:
                 #     del cookie['expiry']  # Selenium no acepta la clave 'expiry'
@@ -200,7 +201,9 @@ def coneccion_driver_extension_location():
                 else:
                     # send_error_email()
                     print('Las cookies estan vencidas')
-                    return
+                    flag = False
+            if flag == False:
+                return
         print("puso las cookies")
     except Exception as e:
         print("Error al cargar las cookies:", e)
