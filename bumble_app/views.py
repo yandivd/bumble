@@ -312,6 +312,16 @@ def form2(request):
             comando_send_keys = {'tipo': 'send_keys', 'texto': captcha_code}
             cola_comandos.put(comando_find_element)
             cola_comandos.put(comando_send_keys)
+            image_path = os.path.join(settings.MEDIA_ROOT, 'captcha_image.png')
+            try:
+                # Verificar si el archivo existe antes de eliminarlo
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+                    print(f"Imagen {image_path} eliminada")
+                else:
+                    print(f"El archivo {image_path} no existe")
+            except Exception as e:
+                print(f"Error al eliminar la imagen {image_path}: {e}")
     
     else:
         # Si el método es GET, simplemente muestra el formulario con el CAPTCHA

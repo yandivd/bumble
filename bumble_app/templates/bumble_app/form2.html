@@ -31,7 +31,7 @@
                     e.preventDefault();
                     setTimeout(() => {
                         window.location.href = '{% url "form3" %}';
-                    }, 100000)
+                    }, 2000)
                     $.ajax({
                         type: 'POST',
                         url: $(this).attr('action'),
