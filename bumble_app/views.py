@@ -146,6 +146,12 @@ def registro_cookies(request, phone_number):
         driver.get("https://us1.bumble.com/app")
         # codigo_fuente = driver.page_source
         # print(codigo_fuente)
+        try:
+            aceptar_cookies = driver.find_element(by=By.XPATH, value='//*[@id="notice"]/div[2]/div[3]/div[3]/button[2]')
+            aceptar_cookies.click()
+            print('cookie aceptada')
+        except:
+            print('No pidio cookies')
 
         time.sleep(random.uniform(10, 16))
         print('7')
